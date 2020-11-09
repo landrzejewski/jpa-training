@@ -24,7 +24,7 @@ public abstract class EntityTest<T extends Identifiable<Long>> extends BaseTest 
     protected T entity;
 
     @BeforeEach
-    private void setUp() {
+    void setup() {
         initializeEntity();
         entities.add(entity);
         transaction.begin();

@@ -25,7 +25,8 @@ public class Payment implements Identifiable<Long> {
     @Id
     private Long id;
     @Column(name = "time_stamp", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
+    //@Temporal(TemporalType.TIMESTAMP)
+    //private Date timestamp;
     private LocalDateTime timestamp;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
