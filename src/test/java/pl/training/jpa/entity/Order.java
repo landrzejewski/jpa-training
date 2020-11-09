@@ -3,10 +3,7 @@ package pl.training.jpa.entity;
 import lombok.*;
 import pl.training.jpa.validators.Description;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
@@ -28,7 +25,9 @@ public class Order {
     private String owner;
     @Description(minLength = 3)
     private String description;
-    private Long totalValue;
+    private Integer totalValue;
+    //@Version
+    //private Long version;
 
     @Override
     public boolean equals(Object otherObject) {
