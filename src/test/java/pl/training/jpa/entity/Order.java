@@ -13,6 +13,7 @@ import javax.validation.constraints.Pattern;
 @Table(name = "orders")
 @Entity
 @Builder
+@ToString
 @Getter
 @Setter
 @AllArgsConstructor
@@ -27,6 +28,7 @@ public class Order {
     private String owner;
     @Description(minLength = 3)
     private String description;
+    private Long totalValue;
 
     @Override
     public boolean equals(Object otherObject) {
