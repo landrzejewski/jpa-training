@@ -19,6 +19,7 @@ import java.util.Date;
 @Table(name = "payments", indexes = @Index(name = "payments_time_stamp", columnList = "time_stamp")
     //,uniqueConstraints = @UniqueConstraint(columnNames = "time_stamp")
 )
+@SecondaryTable(name = "statuses")
 @ExcludeDefaultListeners
 //@ExcludeSuperclassListeners
 //@EntityListeners(CommonEntityLogger.class)
@@ -39,11 +40,15 @@ public class Payment implements Identifiable<Long> {
     //@Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime timestamp;
     @Enumerated(EnumType.STRING)
+    @Column(table = "statuses")
     private PaymentStatus status;
     @Columns(columns = { @Column(name = "value"), @Column(name = "currency", length = 3) })
     //@Type(type = "fastMoney")
     //@Convert(converter = FastMoneyConverter.class)
     private FastMoney value;
+    @AttributeOverride(name = "description", column = @Column(name = "description_text"))
+    @Embedded
+    private Info info;
 
     @Override
     public boolean equals(Object otherObject) {

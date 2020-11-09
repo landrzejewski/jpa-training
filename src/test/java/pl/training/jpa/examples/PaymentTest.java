@@ -1,7 +1,9 @@
-package pl.training.jpa.entity;
+package pl.training.jpa.examples;
 
 import pl.training.jpa.common.EntityTest;
 import pl.training.jpa.common.LocalMoney;
+import pl.training.jpa.entity.Payment;
+import pl.training.jpa.entity.PaymentStatus;
 
 import java.util.Date;
 

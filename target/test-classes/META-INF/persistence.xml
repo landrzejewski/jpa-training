@@ -11,7 +11,7 @@
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/training"/>
             <property name="javax.persistence.jdbc.user" value="admin"/>
             <property name="javax.persistence.jdbc.password" value="admin"/>
-            <property name="javax.persistence.validation.mode" value="none" />
+            <!--<property name="javax.persistence.validation.mode" value="none" />-->
             <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
             <property name="hibernate.hikari.minimumIdle" value="5"/>
             <property name="hibernate.hikari.maximumPoolSize" value="10"/>
