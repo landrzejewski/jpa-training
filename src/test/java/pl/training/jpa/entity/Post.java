@@ -1,6 +1,9 @@
 package pl.training.jpa.entity;
 
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -21,6 +24,8 @@ public class Post {
     private String title;
     @NonNull
     private String text;
+    @BatchSize(size = 5)
+    //@Fetch(FetchMode.SUBSELECT)
     @OneToMany(fetch = FetchType.LAZY)
     private List<PostComment> comments = new ArrayList<>();
 

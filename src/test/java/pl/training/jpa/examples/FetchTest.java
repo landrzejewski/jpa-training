@@ -68,14 +68,27 @@ public class FetchTest extends BaseTest {
     void shouldLazyLoadPostCommentsUsingOneSelectWithJoin() {
         withTransaction(entityManager -> {
             var persistedPost = entityManager.find(Post.class, firstPostId);
-            /*var persistedPost = entityManager.createQuery("select p from Post p where p.id = :id", Post.class)
-                    .setParameter("id", firstPostId)
-                    .getSingleResult();*/
             var comments = persistedPost.getComments();
             assertEquals(1, statistics.getEntityLoadCount());
             comments.forEach(comment -> log.info("Comment: " + comment));
             assertEquals(3, statistics.getEntityLoadCount());
         });
+    }
+
+    @Test
+    void shouldLazyLoadPostCommentsUsingOneSelectWithJoinPerPost() {
+        withTransaction(entityManager -> entityManager.createQuery("select p from Post p", Post.class)
+                .getResultList()
+                .forEach(post -> post.getComments().forEach(comment -> log.info("Comment: " + comment)))
+        );
+    }
+
+    @Test
+    void shouldLoadPostWithComments() {
+        withTransaction(entityManager -> entityManager.createQuery("select p from Post p join fetch p.comments pc", Post.class)
+                .getResultList()
+                .forEach(post -> post.getComments().forEach(comment -> log.info("Comment: " + comment)))
+        );
     }
 
 }
