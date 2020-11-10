@@ -1,7 +1,6 @@
 package pl.training.jpa.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,11 +11,14 @@ import javax.persistence.Table;
 @Entity
 @Getter
 @Setter
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class Tag {
 
     @GeneratedValue
     @Id
     private Long id;
+    @NonNull
     private String name;
 
     @Override
@@ -24,7 +26,7 @@ public class Tag {
         if (this == otherObject) {
             return true;
         }
-        if (!(otherObject instanceof Payment)) {
+        if (!(otherObject instanceof Tag)) {
             return false;
         }
         Tag other = (Tag) otherObject;

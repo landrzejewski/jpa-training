@@ -34,6 +34,7 @@ public abstract class BaseTest {
             task.accept(entityManager);
             transaction.commit();
         } catch (Exception e) {
+            e.printStackTrace();
             transaction.rollback();
         }
         entityManager.close();

@@ -1,8 +1,6 @@
 package pl.training.jpa.entity;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class Post {
 
     @GeneratedValue
@@ -21,21 +21,22 @@ public class Post {
     private String title;
     @NonNull
     private String text;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post")
+    @OneToMany(fetch = FetchType.LAZY)
     private List<PostComment> comments = new ArrayList<>();
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post")
+
+    /*  @OneToOne(cascade = CascadeType.ALL, mappedBy = "post")
     private PostDetails postDetails;
     @ManyToMany
     private List<Tag> tags = new ArrayList<>();
     @Version
-    private long version;
+    private long version;*/
 
     @Override
     public boolean equals(Object otherObject) {
         if (this == otherObject) {
             return true;
         }
-        if (!(otherObject instanceof Payment)) {
+        if (!(otherObject instanceof Post)) {
             return false;
         }
         Post other = (Post) otherObject;
@@ -46,6 +47,5 @@ public class Post {
     public int hashCode() {
         return 31;
     }
-
 
 }

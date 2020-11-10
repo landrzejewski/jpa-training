@@ -27,7 +27,7 @@ public class PostDetails {
         if (this == otherObject) {
             return true;
         }
-        if (!(otherObject instanceof Payment)) {
+        if (!(otherObject instanceof PostDetails)) {
             return false;
         }
         PostDetails other = (PostDetails) otherObject;

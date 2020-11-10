@@ -1,21 +1,24 @@
 package pl.training.jpa.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Table(name = "post_comments")
 @Entity
 @Getter
 @Setter
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class PostComment {
 
     @GeneratedValue
     @Id
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Post post;
+    @NonNull
     private String text;
 
     @Override
@@ -23,7 +26,7 @@ public class PostComment {
         if (this == otherObject) {
             return true;
         }
-        if (!(otherObject instanceof Payment)) {
+        if (!(otherObject instanceof PostComment)) {
             return false;
         }
         PostComment other = (PostComment) otherObject;
