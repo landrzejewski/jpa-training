@@ -1,14 +1,12 @@
 package pl.training.jpa.entity;
 
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedQuery(name = Post.REST_TEXT, query = "update Post p set p.text = 'test'")
 @Table(name = "posts")
 @Entity
 @Getter
@@ -17,6 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Post {
 
+    public static final String REST_TEXT = "postRestText";
+
     @GeneratedValue
     @Id
     private Long id;
@@ -24,17 +24,13 @@ public class Post {
     private String title;
     @NonNull
     private String text;
-    @BatchSize(size = 5)
-    //@Fetch(FetchMode.SUBSELECT)
+    //@BatchSize(size = 5)
     @OneToMany(fetch = FetchType.LAZY)
-    private List<PostComment> comments = new ArrayList<>();
-
-    /*  @OneToOne(cascade = CascadeType.ALL, mappedBy = "post")
-    private PostDetails postDetails;
+    private List<Comment> comments = new ArrayList<>();
+    /*
     @ManyToMany
     private List<Tag> tags = new ArrayList<>();
-    @Version
-    private long version;*/
+    */
 
     @Override
     public boolean equals(Object otherObject) {

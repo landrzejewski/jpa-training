@@ -6,8 +6,8 @@ import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pl.training.jpa.common.BaseTest;
+import pl.training.jpa.entity.Comment;
 import pl.training.jpa.entity.Post;
-import pl.training.jpa.entity.PostComment;
 import pl.training.jpa.entity.Tag;
 
 import java.util.List;
@@ -26,11 +26,11 @@ public class FetchTest extends BaseTest {
     void setup() {
         statistics.setStatisticsEnabled(true);
         var tag = new Tag("Java");
-        var firstComment = new PostComment("Komentarz pierwszy");
-        var secondComment = new PostComment("Komentarz drugi");
+        var firstComment = new Comment("Komentarz pierwszy");
+        var secondComment = new Comment("Komentarz drugi");
         var firstPost = new Post("Programowannie w Javie", "Bardzo fajny post");
         firstPost.setComments(List.of(firstComment, secondComment));
-        var thirdComment = new PostComment("Komentarz trzeci");
+        var thirdComment = new Comment("Komentarz trzeci");
         var secondPost = new Post("Programowannie w Kotlin", "Bardzo fajny post");
         secondPost.setComments(List.of(thirdComment));
         withTransaction(entityManager -> {
@@ -46,7 +46,7 @@ public class FetchTest extends BaseTest {
     }
 
     @Test
-    void shouldNotReadFromDatabaseUntilTagNameIsAccessed() {
+    void shouldNotLoadTagUntilTagNameIsAccessed() {
         withTransaction(entityManager -> {
             var persistedTag = entityManager.getReference(Tag.class, tagId);
             persistedTag.getId();
@@ -65,7 +65,7 @@ public class FetchTest extends BaseTest {
     }
 
     @Test
-    void shouldLazyLoadPostCommentsUsingOneSelectWithJoin() {
+    void shouldLazyLoadCommentsUsingOneSelectWithJoin() {
         withTransaction(entityManager -> {
             var persistedPost = entityManager.find(Post.class, firstPostId);
             var comments = persistedPost.getComments();
@@ -76,7 +76,7 @@ public class FetchTest extends BaseTest {
     }
 
     @Test
-    void shouldLazyLoadPostCommentsUsingOneSelectWithJoinPerPost() {
+    void shouldLazyLoadCommentsUsingOneSelectWithJoinPerPost() {
         withTransaction(entityManager -> entityManager.createQuery("select p from Post p", Post.class)
                 .getResultList()
                 .forEach(post -> post.getComments().forEach(comment -> log.info("Comment: " + comment)))
@@ -84,7 +84,7 @@ public class FetchTest extends BaseTest {
     }
 
     @Test
-    void shouldLoadPostWithComments() {
+    void shouldEagerlyLoadPostWithComments() {
         withTransaction(entityManager -> entityManager.createQuery("select p from Post p join fetch p.comments pc", Post.class)
                 .getResultList()
                 .forEach(post -> post.getComments().forEach(comment -> log.info("Comment: " + comment)))

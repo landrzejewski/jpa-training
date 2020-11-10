@@ -7,13 +7,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "post_comments")
+@Table(name = "comments")
 @Entity
 @Getter
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class PostComment {
+public class Comment {
 
     @GeneratedValue
     @Id
@@ -26,10 +26,10 @@ public class PostComment {
         if (this == otherObject) {
             return true;
         }
-        if (!(otherObject instanceof PostComment)) {
+        if (!(otherObject instanceof Comment)) {
             return false;
         }
-        PostComment other = (PostComment) otherObject;
+        Comment other = (Comment) otherObject;
         return id != null && id.equals(other.getId());
     }
 

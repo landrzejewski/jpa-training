@@ -6,8 +6,10 @@ import pl.training.jpa.entity.Order;
 
 import javax.persistence.LockModeType;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TransactionsTest extends BaseTest {
 
@@ -39,6 +41,18 @@ public class TransactionsTest extends BaseTest {
             var order = entityManager.find(Order.class, orderId);
             assertEquals(taskTwo.getTotalAmount(), order.getTotalValue());
         });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAccessingEntityManagerFromAnotherThread() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        withTransaction(entityManager -> {
+            new Thread(() -> {
+                assertThrows(IllegalStateException.class, () -> entityManager.persist(order));
+                countDownLatch.countDown();
+            }).start();
+        });
+        countDownLatch.await();
     }
 
 }
