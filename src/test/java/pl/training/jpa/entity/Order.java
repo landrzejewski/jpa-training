@@ -26,8 +26,8 @@ public class Order {
     @Description(minLength = 3)
     private String description;
     private Integer totalValue;
-    //@Version
-    //private Long version;
+    @Version
+    private Long version;
 
     @Override
     public boolean equals(Object otherObject) {

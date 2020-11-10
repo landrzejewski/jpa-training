@@ -1,8 +1,11 @@
 package pl.training.jpa.common;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.junit.jupiter.api.AfterEach;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -17,6 +20,11 @@ import java.util.function.Consumer;
 public abstract class BaseTest {
 
     protected EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("training-persistence-unit");
+    protected MetricRegistry metricRegistry = new MetricRegistry();
+    protected Slf4jReporter reporter = Slf4jReporter
+            .forRegistry(metricRegistry)
+            .outputTo(LoggerFactory.getLogger(getClass()))
+            .build();
 
     protected void withTransaction(Consumer<EntityManager> task) {
         var entityManager = entityManagerFactory.createEntityManager();

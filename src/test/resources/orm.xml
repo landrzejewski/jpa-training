@@ -7,7 +7,7 @@
     <persistence-unit-metadata>
         <persistence-unit-defaults>
             <entity-listeners>
-                <entity-listener class="pl.training.jpa.common.CommonEntityLogger"/>
+               <!-- <entity-listener class="pl.training.jpa.common.CommonEntityLogger"/>-->
             </entity-listeners>
         </persistence-unit-defaults>
     </persistence-unit-metadata>

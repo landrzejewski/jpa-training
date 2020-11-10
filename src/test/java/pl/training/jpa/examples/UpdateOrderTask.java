@@ -36,7 +36,7 @@ public class UpdateOrderTask implements Task {
             transaction.begin();
             TimeUnit.SECONDS.sleep(firstSleepTime);
             log.info("##### " + threadName + " before lock ");
-            var order = entityManager.find(Order.class, orderId, LockModeType.PESSIMISTIC_WRITE);
+            var order = entityManager.find(Order.class, orderId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
             log.info("##### " + threadName + " after lock ");
             order.setTotalValue(totalAmount);
             log.info("##### " + threadName + " before commit " + order);
