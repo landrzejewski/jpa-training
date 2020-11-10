@@ -6,6 +6,23 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedStoredProcedureQuery(
+        name = "ourName",
+        procedureName = "procedureName",
+        parameters = {
+                @StoredProcedureParameter(mode = ParameterMode.IN, type = Double.class, name = "parameterName")
+        }
+)
+@SqlResultSetMapping(
+        name = "postMapping",
+        classes = @ConstructorResult(
+                targetClass = PostLite.class,
+                columns = {
+                        @ColumnResult(name = "title")
+                }
+        )
+)
+@NamedNativeQuery(name = Post.BY_ID_NATIVE, query = "select * from posts p where id = ?")
 @NamedQuery(name = Post.REST_TEXT, query = "update Post p set p.text = 'test'")
 @Table(name = "posts")
 @Entity
@@ -16,6 +33,7 @@ import java.util.List;
 public class Post {
 
     public static final String REST_TEXT = "postRestText";
+    public static final String BY_ID_NATIVE = "postByIdNative";
 
     @GeneratedValue
     @Id

@@ -8,8 +8,11 @@ import org.junit.jupiter.api.Test;
 import pl.training.jpa.common.BaseTest;
 import pl.training.jpa.entity.Comment;
 import pl.training.jpa.entity.Post;
+import pl.training.jpa.entity.PostLite;
 import pl.training.jpa.entity.Tag;
 
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,6 +92,33 @@ public class FetchTest extends BaseTest {
                 .getResultList()
                 .forEach(post -> post.getComments().forEach(comment -> log.info("Comment: " + comment)))
         );
+    }
+
+    @Test
+    void shouldCreatePostProjection() {
+        withTransaction(entityManager -> {
+            var result = entityManager.createQuery("select new pl.training.jpa.entity.PostLite(p.title) from Post p", PostLite.class)
+                    .getResultList();
+            assertEquals(2, result.size());
+        });
+    }
+
+    @Test
+    void shouldExecuteStoredProcedure() {
+        withTransaction(entityManager -> {
+            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("procedure name");
+            query.registerStoredProcedureParameter("parameterName", Double.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("resultName", Double.class, ParameterMode.OUT);
+            query.setParameter("parameterName", 2.2);
+            query.execute();
+            Double result = (Double) query.getOutputParameterValue("resultName");
+        });
+        withTransaction(entityManager -> {
+            StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("ourName");
+            query.registerStoredProcedureParameter("parameterName", Double.class, ParameterMode.IN);
+            query.execute();
+            Double result = (Double) query.getOutputParameterValue("resultName");
+        });
     }
 
 }
