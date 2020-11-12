@@ -19,7 +19,8 @@ import java.util.function.Consumer;
 @Log
 public abstract class BaseTest {
 
-    protected EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("training-persistence-unit");
+    protected EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("training-eclipselink-unit");
+            // = Persistence.createEntityManagerFactory("training-hibernate-unit");
     protected MetricRegistry metricRegistry = new MetricRegistry();
     protected Slf4jReporter reporter = Slf4jReporter
             .forRegistry(metricRegistry)

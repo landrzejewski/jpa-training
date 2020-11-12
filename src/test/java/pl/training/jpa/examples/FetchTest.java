@@ -1,7 +1,11 @@
 package pl.training.jpa.examples;
 
 import lombok.extern.java.Log;
+import org.hibernate.LazyInitializationException;
 import org.hibernate.SessionFactory;
+import org.hibernate.envers.AuditReaderFactory;
+import org.hibernate.envers.DefaultRevisionEntity;
+import org.hibernate.envers.RevisionType;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,28 +15,33 @@ import pl.training.jpa.entity.Post;
 import pl.training.jpa.entity.PostLite;
 import pl.training.jpa.entity.Tag;
 
-import javax.persistence.ParameterMode;
-import javax.persistence.StoredProcedureQuery;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Log
 public class FetchTest extends BaseTest {
 
     private final Statistics statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
 
+    private Post result;
     private Long firstPostId;
-    private Long tagId;
+    private Long firstTagId;
 
     @BeforeEach
     void setup() {
         statistics.setStatisticsEnabled(true);
-        var tag = new Tag("Java");
+        var firstTag = new Tag("Java");
+        var secondTag = new Tag("Kotlin");
         var firstComment = new Comment("Komentarz pierwszy");
         var secondComment = new Comment("Komentarz drugi");
         var firstPost = new Post("Programowannie w Javie", "Bardzo fajny post");
         firstPost.setComments(List.of(firstComment, secondComment));
+        firstPost.setTags(Set.of(firstTag, secondTag));
         var thirdComment = new Comment("Komentarz trzeci");
         var secondPost = new Post("Programowannie w Kotlin", "Bardzo fajny post");
         secondPost.setComments(List.of(thirdComment));
@@ -42,16 +51,17 @@ public class FetchTest extends BaseTest {
             entityManager.persist(thirdComment);
             entityManager.persist(firstPost);
             entityManager.persist(secondPost);
-            entityManager.persist(tag);
+            entityManager.persist(firstTag);
+            entityManager.persist(secondTag);
         });
-        tagId = tag.getId();
+        firstTagId = firstTag.getId();
         firstPostId = firstPost.getId();
     }
 
     @Test
     void shouldNotLoadTagUntilTagNameIsAccessed() {
         withTransaction(entityManager -> {
-            var persistedTag = entityManager.getReference(Tag.class, tagId);
+            var persistedTag = entityManager.getReference(Tag.class, firstTagId);
             persistedTag.getId();
             assertEquals(0, statistics.getEntityLoadCount());
             persistedTag.getName();
@@ -65,6 +75,13 @@ public class FetchTest extends BaseTest {
             var persistedPost = entityManager.find(Post.class, firstPostId);
             assertEquals(1, statistics.getEntityLoadCount());
         });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLoadingPostCommentsAfterTransactionIsClosed() {
+        withTransaction(entityManager -> result = entityManager.find(Post.class, firstPostId));
+        var comments = result.getComments();
+        assertThrows(LazyInitializationException.class, () -> comments.forEach(comment -> log.info("Comment: " + comment)));
     }
 
     @Test
@@ -103,21 +120,85 @@ public class FetchTest extends BaseTest {
         });
     }
 
+
     @Test
-    void shouldExecuteStoredProcedure() {
+    void shouldEagerlyLoadPostWithCommentsBasedOnEntityGraph() {
         withTransaction(entityManager -> {
-            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("procedure name");
-            query.registerStoredProcedureParameter("parameterName", Double.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("resultName", Double.class, ParameterMode.OUT);
-            query.setParameter("parameterName", 2.2);
-            query.execute();
-            Double result = (Double) query.getOutputParameterValue("resultName");
+            Map<String, Object> properties = Map.of("javax.persistence.loadgraph", entityManager.getEntityGraph(Post.EAGER_COMMENTS));
+            var persistedPost = entityManager.find(Post.class, firstPostId, properties);
+            assertEquals(3, statistics.getEntityLoadCount());
+        });
+    }
+
+    @Test
+    void shouldEagerlyLoadPostWithCommentsBasedOnGeneratedEntityGraph() {
+        withTransaction(entityManager -> {
+            var postEntityGraph = entityManager.createEntityGraph(Post.class);
+            postEntityGraph.addAttributeNodes("comments");
+            Map<String, Object> properties = Map.of("javax.persistence.loadgraph", postEntityGraph);
+            var persistedPost = entityManager.find(Post.class, firstPostId, properties);
+            assertEquals(3, statistics.getEntityLoadCount());
+        });
+    }
+
+    @Test
+    void shouldLoadPostWithoutText() { // depends on provider
+        withTransaction(entityManager -> {
+            var persistedPost = entityManager.find(Post.class, firstPostId);
+            var data = persistedPost.getData();
+        });
+    }
+
+    @Test
+    void envers() {
+        withTransaction(entityManager -> {
+            var persistedPost = entityManager.find(Post.class, firstPostId);
+            persistedPost.setText("Jpa w praktyce");
+            persistedPost.setTitle("Jpa");
         });
         withTransaction(entityManager -> {
-            StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("ourName");
-            query.registerStoredProcedureParameter("parameterName", Double.class, ParameterMode.IN);
-            query.execute();
-            Double result = (Double) query.getOutputParameterValue("resultName");
+            var persistedPost = entityManager.find(Post.class, firstPostId);
+            entityManager.remove(persistedPost);
+        });
+        withTransaction(entityManager -> {
+            var auditReader = AuditReaderFactory.get(entityManager);
+            List<Object[]> result = auditReader
+                    .createQuery()
+                    .forRevisionsOfEntity(Post.class, false, false)
+                    .getResultList();
+            for (Object[] tuple : result) {
+                var post = (Post) tuple[0];
+                var revisionEntity = (DefaultRevisionEntity) tuple[1];
+                var revisionType = (RevisionType) tuple[2];
+                switch (revisionType) {
+                    case ADD:
+                        log.info("ADD: title - " + post.getTitle() + " timestamp: " + revisionEntity.getTimestamp());
+                        break;
+                    case MOD:
+                        log.info("MOD: title - " + post.getTitle() + " timestamp: " + revisionEntity.getTimestamp());
+                        break;
+                    case DEL:
+                        log.info("DEL: title - " + post.getTitle() + " timestamp: " + revisionEntity.getTimestamp());
+                        break;
+                }
+            }
+        });
+        withTransaction(entityManager -> {
+            var auditReader = AuditReaderFactory.get(entityManager);
+            var revisionNumber = auditReader.getRevisionNumberForDate(new Date());
+            var revisionNumbers = auditReader.getRevisions(Post.class, firstPostId);
+            var post = auditReader.find(Post.class, firstPostId, revisionNumbers.get(0));
+            log.info(post.toString());
+        });
+    }
+
+    @Test
+    void queryHints() {
+        withTransaction(entityManager -> {
+            var result = entityManager.createQuery("select p from Post p", Post.class)
+                    .setHint("javax.persistence.query.timeout", 10000)
+                    .setHint("org.hibernate.flushMode", "")
+                    .getResultList();
         });
     }
 

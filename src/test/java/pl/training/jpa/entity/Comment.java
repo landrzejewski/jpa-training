@@ -1,12 +1,16 @@
 package pl.training.jpa.entity;
 
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
+@Audited(targetAuditMode = NOT_AUDITED)
 @Table(name = "comments")
 @Entity
 @Getter

@@ -9,11 +9,13 @@ import pl.training.jpa.entity.Post;
 import pl.training.jpa.entity.PostLite;
 import pl.training.jpa.entity.Tag;
 
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NativeQueriesTests extends BaseTest {
+public class NativeQueriesAndStoredProceduresTests extends BaseTest {
 
     private final Post firstPost = new Post("Programowannie w Javie", "Bardzo fajny post");
 
@@ -37,6 +39,24 @@ public class NativeQueriesTests extends BaseTest {
                     .setParameter(1, firstPost.getId())
                     .getSingleResult();
             assertEquals(firstPost.getTitle(), post.getShortName());
+        });
+    }
+
+    @Test
+    void shouldExecuteStoredProcedure() {
+        withTransaction(entityManager -> {
+            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("procedure name");
+            query.registerStoredProcedureParameter("parameterName", Double.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("resultName", Double.class, ParameterMode.OUT);
+            query.setParameter("parameterName", 2.2);
+            query.execute();
+            Double result = (Double) query.getOutputParameterValue("resultName");
+        });
+        withTransaction(entityManager -> {
+            StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("ourName");
+            query.registerStoredProcedureParameter("parameterName", Double.class, ParameterMode.IN);
+            query.execute();
+            Double result = (Double) query.getOutputParameterValue("resultName");
         });
     }
 
