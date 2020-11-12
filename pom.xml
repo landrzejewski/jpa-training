@@ -13,6 +13,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hibernate.version>5.4.23.Final</hibernate.version>
         <junit.version>5.7.0</junit.version>
         <mockito.version>3.5.15</mockito.version>
     </properties>
@@ -74,13 +75,19 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.4.23.Final</version>
+            <version>${hibernate.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-envers</artifactId>
-            <version>5.4.23.Final</version>
+            <version>${hibernate.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <version>${hibernate.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,6 +1,7 @@
 package pl.training.jpa.entity;
 
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -10,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Cacheable
+@org.hibernate.annotations.Cache(region = "posts", usage = CacheConcurrencyStrategy.READ_WRITE)
 @Audited
 @NamedEntityGraph(
         name = Post.EAGER_COMMENTS,

@@ -15,6 +15,8 @@ import pl.training.jpa.entity.Post;
 import pl.training.jpa.entity.PostLite;
 import pl.training.jpa.entity.Tag;
 
+import javax.persistence.CacheRetrieveMode;
+import javax.persistence.CacheStoreMode;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ public class FetchTest extends BaseTest {
 
     private Post result;
     private Long firstPostId;
+    private Long secondPostId;
     private Long firstTagId;
 
     @BeforeEach
@@ -56,6 +59,7 @@ public class FetchTest extends BaseTest {
         });
         firstTagId = firstTag.getId();
         firstPostId = firstPost.getId();
+        secondPostId = secondPost.getId();
     }
 
     @Test
@@ -200,6 +204,45 @@ public class FetchTest extends BaseTest {
                     .setHint("org.hibernate.flushMode", "")
                     .getResultList();
         });
+    }
+
+    @Test
+    void secondLevelCache() {
+        /*withTransaction(entityManager -> {
+            var cache = entityManagerFactory.getCache();
+            cache.evictAll();
+        });
+        withTransaction(entityManager -> {
+            entityManager.find(Post.class, firstPostId);
+            entityManager.find(Post.class, secondPostId);
+            printCacheUsageStats();
+        });
+        withTransaction(entityManager -> {
+            Map<String, Object> properties = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+            entityManager.find(Post.class, firstPostId, properties);
+            entityManager.find(Post.class, secondPostId);
+            printCacheUsageStats();
+        });*/
+        withTransaction(entityManager -> {
+            var cache = entityManagerFactory.getCache();
+            cache.evictAll();
+            Map<String, Object> properties = Map.of("javax.persistence.cache.storeMode", CacheStoreMode.USE);
+            var post = entityManager.find(Post.class, firstPostId, properties);
+            post.setTitle("new value");
+            entityManager.flush();
+            printCacheUsageStats();
+        });
+        withTransaction(entityManager -> {
+            var post = entityManager.find(Post.class, firstPostId);
+            log.info(post.toString());
+            printCacheUsageStats();
+        });
+    }
+
+    private void printCacheUsageStats() {
+        log.info("2 level cache hit count: " + statistics.getSecondLevelCacheHitCount());
+        log.info("2 level cache miss count: " + statistics.getSecondLevelCacheMissCount());
+        log.info("2 level cache put count: " + statistics.getSecondLevelCachePutCount());
     }
 
 }

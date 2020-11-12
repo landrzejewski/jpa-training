@@ -16,6 +16,10 @@
             <property name="hibernate.hikari.minimumIdle" value="5"/>
             <property name="hibernate.hikari.maximumPoolSize" value="10"/>
             <property name="hibernate.hikari.idleTimeout" value="30000"/>
+            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.cache.use_query_cache" value="true"/>
+            <property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.internal.EhcacheRegionFactory"/>
+            <property name="net.sf.ehcache.configurationResourceName" value="ehcache.xml"/>
             <!--<property name="hibernate.generate_statistics" value="true"/>-->
            <!-- Nie zalecane - używać logera
             <property name="hibernate.show_sql" value="true"/>
